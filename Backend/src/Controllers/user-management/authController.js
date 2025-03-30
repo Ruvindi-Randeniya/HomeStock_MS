@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../userModels/userModel");
+const User = require("../../Models/user-management/userModel");
 
 const register = async (req, res) => {
     try {
@@ -8,9 +8,9 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "Empty JSON body received" });
         }
 
-        const { firstname, lastname, username, password, role } = req.body;
+        const { firstname, lastname, username, email, password, role } = req.body;
 
-        if (!firstname || !lastname || !username || !password || !role) {
+        if (!firstname || !lastname || !username || !email || !password || !role) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
@@ -20,14 +20,13 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "Firstname and Lastname must contain only letters" });
         }
 
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
-            return res.status(400).json({ message: "Username already taken" });
+            return res.status(400).json({ message: "Username or email already taken" });
         }
 
-
-         // Ensure password is at least 6 characters
-         if (password.length < 6) {
+        // Ensure password is at least 6 characters
+        if (password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters long" });
         }
 
@@ -37,9 +36,8 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "Invalid role selected" });
         }
 
-
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ firstname, lastname, username, password: hashedPassword, role });
+        const newUser = new User({ firstname, lastname, username, email, password: hashedPassword, role });
         await newUser.save();
 
         res.status(201).json({ message: `User registered with username ${username}` });
@@ -74,9 +72,9 @@ const login = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { firstname, lastname, username, password, role } = req.body; // ✅ Added 'role' here
+        const { firstname, lastname, username, email, password, role } = req.body; 
 
-        if (!firstname && !lastname && !username && !password && !role) {
+        if (!firstname && !lastname && !username && !email && !password && !role) {
             return res.status(400).json({ message: "At least one field is required for update" });
         }
 
@@ -87,7 +85,6 @@ const updateUser = async (req, res) => {
 
         const nameRegex = /^[A-Za-z]+$/;
 
-        // Validate firstname & lastname if provided
         if (firstname && !nameRegex.test(firstname)) {
             return res.status(400).json({ message: "Firstname must contain only letters" });
         }
@@ -95,7 +92,6 @@ const updateUser = async (req, res) => {
             return res.status(400).json({ message: "Lastname must contain only letters" });
         }
 
-        // Check if the username already exists (if updating username)
         if (username && username !== user.username) {
             const existingUser = await User.findOne({ username });
             if (existingUser) {
@@ -104,18 +100,23 @@ const updateUser = async (req, res) => {
             user.username = username;
         }
 
-        // Ensure password is at least 6 characters if updating
+        if (email && email !== user.email) {
+            const existingEmail = await User.findOne({ email });
+            if (existingEmail) {
+                return res.status(400).json({ message: "Email already taken" });
+            }
+            user.email = email;
+        }
+
         if (password && password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters long" });
         }
 
-        // Validate role if provided
         const validRoles = ["admin", "HouseholdOwner", "user"];
         if (role && !validRoles.includes(role)) {
             return res.status(400).json({ message: "Invalid role selected" });
         }
 
-        // ✅ Update fields only if they are provided
         if (firstname) user.firstname = firstname;
         if (lastname) user.lastname = lastname;
         if (role) user.role = role;
@@ -125,7 +126,6 @@ const updateUser = async (req, res) => {
 
         await user.save();
         res.status(200).json({ message: "User updated successfully", user });
-
     } catch (err) {
         console.error("Update Error:", err);
         res.status(500).json({ message: "Something went wrong", error: err.message });

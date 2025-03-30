@@ -1,6 +1,6 @@
 const express = require("express");
-const verifyToken = require("../middleware/authMiddleware");
-const authorizeRoles = require("../middleware/roleMiddleware");
+const verifyToken = require("../../middleware/user-management/authMiddleware");
+const authorizeRoles = require("../../middleware/user-management/roleMiddleware");
 const router = express.Router();
 
 //Only admin can access this router
