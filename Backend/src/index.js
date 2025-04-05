@@ -1,23 +1,21 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
-const dbConnect = require("./config/user-management/dbConnect");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const connectDB = require("./config/user-management/db"); // Ensure the DB connection function is correct
 const authRoutes = require("./Routes/user-management/authRoutes");
 const userRoutes = require("./Routes/user-management/userRoutes");
 
-dbConnect();
+dotenv.config();
+connectDB(); // Connect to your database
 
 const app = express();
 
-//Middleware
-app.use(express.json());
+app.use(cors()); // Enable CORS
+app.use(express.json()); // Parse JSON bodies
 
-//Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+// Routes
+app.use("/api/auth", authRoutes);   // For Login and Register
+app.use("/api/users", userRoutes);  // For User Profile and Admin Functions
 
-
-//Start the server
-const PORT = process.env.PORT || 7002;
-app.listen(PORT, () => {
-  console.log(`Server is running at port ${PORT}`);
-})
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

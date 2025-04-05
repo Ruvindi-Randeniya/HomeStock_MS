@@ -1,22 +1,40 @@
-const express = require("express");
-const verifyToken = require("../../middleware/user-management/authMiddleware");
-const authorizeRoles = require("../../middleware/user-management/roleMiddleware");
+const express = require('express');
 const router = express.Router();
+const {
+  getAllUsers,
+  getUserById,
+  registerUser,
+  loginUser,
+  getProfile,
+  updateProfile,
+  deleteUser,
+  updateUser
+} = require('../../Controllers/user-management/userController');
 
-//Only admin can access this router
-router.get("/admin", verifyToken, authorizeRoles("admin"), (req,res) => {
-    res.json({ message: "Welcome Admin"});
-});
+const { protect, adminOnly } = require('../../middleware/user-management/auth');
 
-//Both admin and HouseholdOwner can access this router
-router.get("/HouseholdOwner", verifyToken, authorizeRoles("admin" , "HouseholdOwner"), (req,res) => {
-    res.json({ message: "Welcome HouseholdOwner"});
-});
+// Register a new user (admin only)
+router.post('/register', protect, adminOnly, registerUser);
 
-//All can access this router
-router.get("/user", verifyToken, authorizeRoles("admin" , "HouseholdOwner", "user"),(req,res) => {
-    res.json({ message: "Welcome User"});
-});
+// Login
+router.post('/login', loginUser);
 
+// Get own profile
+router.get('/profile', protect, getProfile);
+
+// Update own profile
+router.put('/profile', protect, updateProfile);
+
+// Get all users (admin only)
+router.get('/', protect, adminOnly, getAllUsers);
+
+// Get single user by ID (admin only)
+router.get('/:id', protect, adminOnly, getUserById);
+
+// Delete user (admin only)
+router.delete('/:id', protect, adminOnly, deleteUser);
+
+// Update user (admin only)
+router.put('/:id', protect, adminOnly, updateUser);
 
 module.exports = router;
