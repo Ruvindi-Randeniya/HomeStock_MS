@@ -1,17 +1,16 @@
 import React, {useState,useEffect} from 'react'
 import axios from 'axios'
-import {jsPDF} from 'jspdf'
-import "jspdf-autotable"
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './categoryoverview.css'
 
 const Categoryoverview = () => {
 
     const [categories, setCategories] = useState([]);
-
     // Fetch categories from API
     useEffect(() => {
       axios
-        .get("http://localhost:3000/api/categories") // Update API endpoint accordingly
+        .get("http://localhost:3000/api/category") // Update API endpoint accordingly
         .then((res) => setCategories(res.data))
         .catch((err) => console.error("Error fetching data:", err));
     }, []);
@@ -19,30 +18,13 @@ const Categoryoverview = () => {
     // Handle Delete
     const handleDelete = (id) => {
       axios
-        .delete(`http://localhost:3000/api/categories/${id}`)
+        .delete(`http://localhost:3000/api/category/${id}`)
         .then(() => {
           setCategories(categories.filter((category) => category._id !== id));
         })
         .catch((err) => console.error("Error deleting category:", err));
     };
   
-    // Generate PDF
-    const generatePDF = () => {
-      const doc = new jsPDF();
-      doc.text("Category Overview Report", 20, 10);
-  
-      const tableColumn = ["Category ID", "Category Name", "Create Date"];
-      const tableRows = [];
-  
-      categories.forEach((category) => {
-        const rowData = [category.categoryID, category.categoryName, category.date];
-        tableRows.push(rowData);
-      });
-  
-      doc.autoTable(tableColumn, tableRows, { startY: 20 });
-      doc.save("Category_Overview.pdf");
-    };
-
   return (
     <div>
         <h1 className="text">Category Overview</h1>
@@ -76,7 +58,7 @@ const Categoryoverview = () => {
           ))}
       </tbody>
     </table>
-    <button type='pdf' onClick={generatePDF}>Generate PDF</button>
+    <button type='pdf' >Generate PDF</button>
   </div>
   </div>
   )

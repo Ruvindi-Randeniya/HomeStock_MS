@@ -1,8 +1,8 @@
-import React, {useState} from 'react'
-import './insertsubcategory.css'
+import React, {useEffect, useState} from 'react'
+import './updatesubcategory.css'
 import axios from 'axios';
-
-const Insertsubcategory = () => {
+import { useParams, useNavigate } from 'react-router-dom';
+const Updatesubcategory = () => {
   const [formData, setFormData] = useState({
     categoryID: "",
     subCategoryID: "",
@@ -10,6 +10,9 @@ const Insertsubcategory = () => {
     date: "",
     subCategoryImage: ""
   });
+
+  const {id} = useParams()
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,28 +23,26 @@ const Insertsubcategory = () => {
     setFormData({ ...formData, subCategoryImage: e.target.files[0] });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const data = new FormData();
-      data.append("categoryID", formData.categoryID);
-      data.append("subCategoryID", formData.subCategoryID);
-      data.append("subCategoryName", formData.subCategoryName);
-      data.append("date", formData.date);
-      data.append("subCategoryImage", formData.subCategoryImage);
-
-      await axios.post("http://localhost:3000/api/subcategory", data);
-      alert("Sub-category added successfully");
-
-    } catch (error) {
-      alert("Sub-category addition failed");
-    }
-    
-  };
+ useEffect(() =>{
+    axios
+    .get(`http://localhost:3000/api/subcategory/${id}`)
+    .then((res)=>{
+        setFormData({
+            categoryID: res.data.categoryID,
+            subCategoryID: res.data.subCategoryID,
+            subCategoryName: res.data.subCategoryName,
+            subCategoryImage: res.data.subCategoryImage,
+            date: res.data.date
+        })
+    })
+    .catch((err) =>{
+        console.log('Error from update category')
+    })
+ },[id])
 
   return (
     <div>
-    <h1>ADDING SUB CATEGORIES</h1>
+    <h1>UPDATE SUB CATEGORIES</h1>
     <div className='container'>
       <form>
         <label htmlFor='categoryID'> Category ID</label> 
@@ -67,4 +68,4 @@ const Insertsubcategory = () => {
   )
 }
 
-export default Insertsubcategory
+export default Updatesubcategory
