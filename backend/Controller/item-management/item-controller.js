@@ -3,8 +3,8 @@ const Item = require('../../Model/item-management/item-model');
 // Create an Item
 exports.createItem = async (req, res) => {
     try {
-        const { name, role, quantity, category, expireDate } = req.body;
-        const newItem = new Item({ name, role, quantity, category, expireDate });
+        const { name, category, subCategory, quantity, expireDate } = req.body;  // Updated to 'subCategory'
+        const newItem = new Item({ name, category, subCategory, quantity, expireDate });  // Updated to 'subCategory'
         await newItem.save();
         res.status(201).json({ success: true, message: "Item added successfully", data: newItem });
     } catch (error) {
@@ -38,7 +38,8 @@ exports.getItemById = async (req, res) => {
 // Update an Item
 exports.updateItem = async (req, res) => {
     try {
-        const item = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const { category, subCategory, quantity, expireDate } = req.body;  // Updated to 'subCategory'
+        const item = await Item.findByIdAndUpdate(req.params.id, { category, subCategory, quantity, expireDate }, { new: true, runValidators: true });  // Updated to 'subCategory'
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found" });
         }
