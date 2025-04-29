@@ -179,7 +179,7 @@ const AddItem = () => {
             <div className="flex justify-between">
               <button
                 type="submit"
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-4 py-2 rounded shadow"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded shadow"
               >
                 Done
               </button>
