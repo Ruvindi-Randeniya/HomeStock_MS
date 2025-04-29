@@ -12,6 +12,7 @@ const Updatesubcategory = () => {
   });
 
   const {id} = useParams()
+  const navigate = useNavigate()
 
 
   const handleChange = (e) => {
@@ -36,7 +37,7 @@ const Updatesubcategory = () => {
         })
     })
     .catch((err) =>{
-        console.log('Error from update category')
+        console.log('Error from update sub-category')
     })
  },[id])
 
@@ -44,7 +45,7 @@ const Updatesubcategory = () => {
     <div>
     <h1>UPDATE SUB CATEGORIES</h1>
     <div className='container'>
-      <form>
+      <form >
         <label htmlFor='categoryID'> Category ID</label> 
         <input type='text' placeholder='Enter Category ID' name='categoryID' value={formData.categoryID} onChange={handleChange} required/> <br/>
 

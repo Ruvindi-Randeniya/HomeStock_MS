@@ -1,22 +1,49 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer')
 const Category = require("../../model/category-management/category"); // Make sure the path is correct
 
 // Test route
 router.get("/test", (req, res) => res.send("Category routes working"));
 
-// Create a new category
-router.post("/", async (req, res) => {
-    console.log("Incoming POST request to /categories");
-    console.log("Request body:", req.body);
+const path = require("path")
+const fs = require("fs");
 
+const uploadDir = path.join(__dirname, "uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Configure multer storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/");
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    },
+});
+
+const upload = multer({ storage: storage });
+
+
+router.post("/", upload.single("categoryImage"), async (req, res) => {
     try {
-        const newCategory = new Category(req.body);
+        const { categoryID, categoryName, date } = req.body;
+        const categoryImage = req.file ? req.file.path : null;
+
+        const newCategory = new category({
+            categoryID,
+            categoryName,
+            categoryImage,
+            date,
+        });
+
         await newCategory.save();
-        console.log("Category created successfully");
         res.status(201).json({ msg: "Category added successfully" });
     } catch (error) {
-        console.error("Error while adding category:", error.message);
+        console.error("Error while adding Category:", error.message);
         res.status(400).json({ msg: "Category adding failed", error: error.message });
     }
 });

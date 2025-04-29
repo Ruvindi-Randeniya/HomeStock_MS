@@ -1,15 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './updatecategory.css'
 import axios from 'axios'
+import { useParams, useNavigate } from 'react-router-dom';
 
 const Updatecategory = () => {
-
-  const [formData, setFormData] = useState({
+ const [formData, setFormData] = useState({
     categoryID: "",
     categoryname: "",
     date: "",
     categoryImage: ""
   });
+
+  const { id } = useParams();
+  const navigate = useNavigate();
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,27 +24,27 @@ const Updatecategory = () => {
     setFormData({ ...formData, categoryImage: e.target.files[0] });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const data = new FormData();
-      data.append("categoryID", formData.categoryID);
-      data.append("categoryname", formData.categoryname);
-      data.append("date", formData.date);
-      data.append("categoryImage", formData.categoryImage);
-
-      await axios.post("http://localhost:3000/api/category", data);
-      alert("Category added successfully");
-    } catch (error) {
-      alert("Category addition failed");
-    }
-  };
+  useEffect(() =>{
+    axios
+    .get(`http://localhost:3000/api/category/${id}`)
+    .then((res) =>{
+      setFormData({
+        categoryID: res.data.categoryID,
+        categoryname: res.data.categoryname,
+        categoryImage: res.data.categoryImage,
+        date: res.data.date
+      })
+    })
+    .catch((err) =>{
+      console.log('Error from update category')
+    })
+  },[id])
 
   return (
     <div>
     <h1>UPDATE CATEGORIES</h1>
     <div className='container'>
-      <form onSubmit={handleSubmit}>
+      <form>
         <label htmlFor='categoryID'> Category ID</label> 
         <input type='text' placeholder='Enter Category ID' name='categoryID' value={formData.categoryID} onChange={handleChange} required /> <br/>
 

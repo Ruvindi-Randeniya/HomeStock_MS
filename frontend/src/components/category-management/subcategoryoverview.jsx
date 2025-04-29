@@ -3,6 +3,7 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import "jspdf-autotable";
 import './subcategoryoverview.css';
+import { Link } from "react-router-dom";
 
 const SubCategoryOverview = () => {
   const [subCategories, setSubCategories] = useState([]);
@@ -64,7 +65,8 @@ const SubCategoryOverview = () => {
   return (
     <div>
       <h1 className="text">Sub-Category Overview</h1>
-      <button type='btn'>+ Add Sub-Category</button>
+      <Link to={`/inserts`}>
+      <button className="add-btn">+ Add Sub-Category</button> </Link>
 
       <div className="container">
         {/* 🔍 Search Input */}
@@ -89,17 +91,22 @@ const SubCategoryOverview = () => {
           </thead>
           <tbody>
             {filteredSubCategories.map((subcategory) => (
-              <tr key={subcategory._id} className="border">
+              <tr key={subcategory._id} className="table row">
                 <td className="th">{subcategory.categoryID}</td>
                 <td className="th">{subcategory.subCategoryID}</td>
                 <td className="th">{subcategory.subCategoryName}</td>
                 <td className="th">{subcategory.date}</td>
                 <td className="th">
+                <div className="image-box">
                   <img src={subcategory.image} alt='subcategory' className="image" />
+               </div>
                 </td>
                 <td className="th">
-                  <button type='edit'>Edit</button>
-                  <button type='delete' onClick={() => handleDelete(subcategory._id)}>Delete</button>
+                <div className="action-buttons">
+                  <Link to={`/updatesubcategory/${subcategory._id}`}>
+                              <button className="edit-btn">Edit</button></Link>
+                  <button className="delete-btn" onClick={() => handleDelete(subcategory._id)}>Delete</button>
+                </div>
                 </td>
               </tr>
             ))}
@@ -107,7 +114,9 @@ const SubCategoryOverview = () => {
         </table>
 
         {/* 📄 PDF Button */}
-        <button type='pdf' onClick={generatePDF}>Generate PDF</button>
+        <div className="pdf-button-container">
+        <button className="pdf-btn" onClick={generatePDF}>Generate PDF</button>
+        </div>
       </div>
     </div>
   );
