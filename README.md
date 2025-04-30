@@ -1,3 +1,6 @@
+
+HOME STOCK
+
 HomeStock (NestFlow) is a smart household inventory management system built with the MERN stack and AI. It helps users track their household items, get real-time low stock and expiry alerts, and receive AI-based shopping suggestions. The system offers features like personalized user profiles, budgeting, and waste reduction.
 NestFlow includes modules for user management, category management, item management, and expiry tracking. Compared to existing platforms, it is fully automated, provides personalized budgeting, and minimizes waste.
 NestFlow is easy to use, helpful, and effective in achieving its goals. It is a modern solution for responsible household management.
