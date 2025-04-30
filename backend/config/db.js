@@ -1,17 +1,17 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
 const dburl = "mongodb+srv://Admin:uxf7tOzFuKVZgBK9@cluster0.t7ddp.mongodb.net/Test?retryWrites=true&w=majority";
 
-mongoose.set("strictQuery", true, "useNewUrlParser", true)
+mongoose.set("strictQuery",true, "useCreateIndex", true);
 
 const connection = async () => {
-    try{
-        await mongoose.connect(dburl)
-        console.log("MongoDB Connected~")
-    }catch(e){
-        console.error(e.message)
-        process.exit()
+    try {
+        await mongoose.connect(dburl);
+        console.log("Database connected successfully");
+    } catch (error) {
+        console.error(error.message);
+        process.exit();
     }
-}
+};
 
-module.exports = connection
+module.exports = connection;
