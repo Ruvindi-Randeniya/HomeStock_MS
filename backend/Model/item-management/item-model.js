@@ -7,11 +7,13 @@ const ItemSchema = new mongoose.Schema({
         trim: true
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',   // Reference to Category model
         required: true
     },
-    subCategory: {  // Updated field name to match frontend
-        type: String,
+    subCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SubCategory',
         required: true
     },
     quantity: {

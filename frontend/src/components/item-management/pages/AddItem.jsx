@@ -15,30 +15,48 @@ const AddItem = () => {
 
   const [errors, setErrors] = useState({});
   const [existingItems, setExistingItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
 
-  // Fetch existing items on load
   useEffect(() => {
-    const fetchItems = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/items");
-        // Safely extract items array
-        const items = Array.isArray(res.data)
-          ? res.data
-          : res.data.items || [];
+        setIsLoading(true);
+        const resItems = await axios.get("http://localhost:3000/api/items");
+        setExistingItems(resItems.data.data || []);
 
-        setExistingItems(items);
+        const resCategories = await axios.get("http://localhost:3000/api/category");
+        const categoryData = resCategories.data.data || resCategories.data || [];
+        setCategories(categoryData);
+        console.log("Categories:", categoryData); // Debug: Inspect categories
+
+        const resSubCategories = await axios.get("http://localhost:3000/api/subcategory");
+        const subCategoryData = resSubCategories.data.data || resSubCategories.data || [];
+        setSubCategories(subCategoryData);
+        console.log("SubCategories:", subCategoryData); // Debug: Inspect subcategories
       } catch (error) {
-        console.error("Error fetching items:", error);
+        console.error("Error fetching data:", error);
+        alert("Failed to load categories or items.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchItems();
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleCategoryChange = (e) => {
+    setFormData({
+      ...formData,
+      category: e.target.value,
     });
   };
 
@@ -50,13 +68,20 @@ const AddItem = () => {
     if (!formData.quantity.trim()) {
       newErrors.quantity = "Quantity is required";
     } else if (!/^\d+(\.\d+)?(kg|g|L|ml)$/i.test(formData.quantity)) {
-      newErrors.quantity =
-        "Invalid format. Use numbers followed by kg, g, L, or ml";
+      newErrors.quantity = "Invalid format. Use numbers followed by kg, g, L, or ml";
     }
 
-    if (!formData.category.trim()) newErrors.category = "Category is required";
-    if (!formData.subCategory.trim())
+    if (!formData.category) newErrors.category = "Category is required";
+
+    if (!formData.subCategory) {
       newErrors.subCategory = "Sub Category is required";
+    } else {
+      // Verify subCategory is a valid ObjectId
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(formData.subCategory);
+      if (!isValidObjectId) {
+        newErrors.subCategory = "Invalid Sub Category selected";
+      }
+    }
 
     if (!formData.expireDate) {
       newErrors.expireDate = "Expire Date is required";
@@ -75,9 +100,11 @@ const AddItem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      console.log("Validation errors:", errors); // Debug: Log validation errors
+      return;
+    }
 
-    // Check if item with the same name already exists
     const existingItem = existingItems.find(
       (item) =>
         item.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
@@ -93,21 +120,22 @@ const AddItem = () => {
       return;
     }
 
+    console.log("Submitting form data:", formData); // Debug: Log form data
+
     try {
-      const payload = {
+      const response = await axios.post("http://localhost:3000/api/items", {
         name: formData.name,
         quantity: formData.quantity,
         category: formData.category,
         subCategory: formData.subCategory,
         expireDate: formData.expireDate,
-      };
-
-      await axios.post("http://localhost:3000/api/items", payload);
+      });
+      console.log("Item added successfully:", response.data); // Debug: Log success
       alert("🎉 Item added successfully!");
       navigate("/item-management");
     } catch (error) {
-      console.error("❌ Failed to add item:", error);
-      alert("Something went wrong while submitting!");
+      console.error("❌ Failed to add item:", error.response?.data || error.message);
+      alert(`Failed to add item: ${error.response?.data?.error || "Unknown error"}`);
     }
   };
 
@@ -146,22 +174,57 @@ const AddItem = () => {
               placeholder="e.g., 2kg, 500g, 1.5L, 250ml"
             />
             <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="Category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                error={errors.category}
-                placeholder="Enter category"
-              />
-              <InputField
-                label="Sub Category"
-                name="subCategory"
-                value={formData.subCategory}
-                onChange={handleChange}
-                error={errors.subCategory}
-                placeholder="Enter sub-category"
-              />
+              <div>
+                <label className="block font-medium">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleCategoryChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  disabled={isLoading}
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.categoryname}
+                    </option>
+                  ))}
+                </select>
+                {errors.category && (
+                  <p className="text-red-500 text-sm">{errors.category}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium">Sub Category</label>
+                <select
+                  name="subCategory"
+                  value={formData.subCategory}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  disabled={isLoading || subCategories.length === 0}
+                >
+                  <option value="">Select a sub-category</option>
+                  {subCategories.length > 0 ? (
+                    subCategories.map((sub) => (
+                      <option key={sub._id} value={sub._id}>
+                        {sub.subCategoryName}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>
+                      No subcategories available
+                    </option>
+                  )}
+                </select>
+                {errors.subCategory && (
+                  <p className="text-red-500 text-sm">{errors.subCategory}</p>
+                )}
+                {!isLoading && subCategories.length === 0 && (
+                  <p className="text-yellow-500 text-sm">
+                    No subcategories found. Please add subcategories first.
+                  </p>
+                )}
+              </div>
             </div>
             <div>
               <label className="block font-medium">Expire Date</label>
@@ -180,6 +243,7 @@ const AddItem = () => {
               <button
                 type="submit"
                 className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded shadow"
+                disabled={isLoading || subCategories.length === 0 || !formData.subCategory}
               >
                 Done
               </button>
