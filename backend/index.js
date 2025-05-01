@@ -1,9 +1,8 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const itemRoutes = require('./Route/item-management/item-route'); // Ensure correct path
-const routes1 = require("./route/category-management/category-route")
-const routes2 = require("./route/category-management/subCategory-route");
-const router = require("./route/category-management/category-route");
+const routes1 = require("./Route/category-management/category-route") // Ensure correct path
+const routes2 = require("./Route/category-management/subCategory-route")
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
