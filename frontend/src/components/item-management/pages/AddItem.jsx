@@ -67,8 +67,8 @@ const AddItem = () => {
 
     if (!formData.quantity.trim()) {
       newErrors.quantity = "Quantity is required";
-    } else if (!/^\d+(\.\d+)?(kg|g|L|ml)$/i.test(formData.quantity)) {
-      newErrors.quantity = "Invalid format. Use numbers followed by kg, g, L, or ml";
+    } else if (!/^\d+(\.\d+)?(kg|g|L|ml|pcs|KG|G|L|ML|PCS)$/i.test(formData.quantity)) {
+      newErrors.quantity = "Invalid format. Use numbers followed by kg, g, L, ml, pcs";
     }
 
     if (!formData.category) newErrors.category = "Category is required";
@@ -171,7 +171,7 @@ const AddItem = () => {
               value={formData.quantity}
               onChange={handleChange}
               error={errors.quantity}
-              placeholder="e.g., 2kg, 500g, 1.5L, 250ml"
+              placeholder="e.g., 2kg, 500g, 1.5L, 250ml, 10pcs"
             />
             <div className="grid grid-cols-2 gap-4">
               <div>

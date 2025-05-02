@@ -47,7 +47,7 @@ const EditItem = () => {
   const validate = () => {
     let newErrors = {};
 
-    if (formData.quantity && !/^\d+(\.\d+)?(kg|g|L|ml)$/i.test(formData.quantity)) {
+    if (formData.quantity && !/^\d+(\.\d+)?(kg|g|L|ml|pcs)$/i.test(formData.quantity)) {
       newErrors.quantity = "Use format like 2kg, 1.5L, etc.";
     }
 
