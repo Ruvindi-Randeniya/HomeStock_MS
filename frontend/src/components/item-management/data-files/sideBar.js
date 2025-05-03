@@ -29,6 +29,12 @@ const Sidebar = () => {
         >
           Item Management
         </Link>
+        <Link 
+          to="/expItem" 
+          className={`py-2 px-4 rounded ${location.pathname === "/expItem" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}
+        >
+          Exp Item
+        </Link>
       </nav>
     </div>
   );
