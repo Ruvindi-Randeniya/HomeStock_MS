@@ -30,12 +30,12 @@ const upload = multer({ storage: storage });
 
 router.post("/", upload.single("categoryImage"), async (req, res) => {
     try {
-        const { categoryID, categoryName, date } = req.body;
+        const { categoryID, categoryname, date } = req.body;
         const categoryImage = req.file ? req.file.path : null;
 
-        const newCategory = new category({
+        const newCategory = new Category({
             categoryID,
-            categoryName,
+            categoryname,
             categoryImage,
             date,
         });

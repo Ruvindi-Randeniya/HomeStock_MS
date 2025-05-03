@@ -10,11 +10,12 @@ import Sidebar from './components/category-management/sidebar';
 import SubCategoryOverview from './components/category-management/subcategoryoverview';
 import Updatecategory from './components/category-management/updatecategory';
 import Updatesubcategory from './components/category-management/updatesubcategory';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
-    <Router>
+    <div>
+
       <div style={{ display: 'flex' }}>
         <Sidebar />
         <div style={{ flexGrow: 1, padding: '2rem' }}>
@@ -23,16 +24,17 @@ function App() {
             <Route path="/add-item" element={<AddItem />} />
             <Route path="/item-management" element={<ItemManagement />} />
             <Route path="/edit-item/:id" element={<EditItem />} />
-            <Route path="/category-overview" element={<Categoryoverview />} />
-            <Route path="/insert-category" element={<Insertcategory />} />
-            <Route path="/insert-subcategory" element={<Insertsubcategory />} />
-            <Route path="/subcategory-overview" element={<SubCategoryOverview />} />
-            <Route path="/update-category/:id" element={<Updatecategory />} />
-            <Route path="/update-subcategory/:id" element={<Updatesubcategory />} />
+            <Route path="/overviewc" element={<Categoryoverview />} />
+            <Route path="/insertc" element={<Insertcategory />} />
+            <Route path="/inserts" element={<Insertsubcategory />} />
+            <Route path="/overviews" element={<SubCategoryOverview />} />
+            <Route path="/updatec/:id" element={<Updatecategory />} />
+            <Route path="/updates/:id" element={<Updatesubcategory />} />
           </Routes>
         </div>
       </div>
-    </Router>
+   
+    </div>
   );
 }
 
