@@ -1,11 +1,23 @@
 {
-  "name": "itpm---copy1---copy",
+  "name": "homestock_ms",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "ITPM Project",
+  "homepage": "https://github.com/Ruvindi-Randeniya/HomeStock_MS#readme",
+  "bugs": {
+    "url": "https://github.com/Ruvindi-Randeniya/HomeStock_MS/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ruvindi-Randeniya/HomeStock_MS.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "nodemon": "^3.1.9"
+  }
 }
