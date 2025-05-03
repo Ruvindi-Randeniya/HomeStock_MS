@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Sidebar from "./user-management/sidebar";
+import Sidebar from "./sidebar";
 import { useParams } from "react-router-dom";
 
 const UpdateUser = () => {
@@ -22,9 +22,9 @@ const UpdateUser = () => {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+        const response = await fetch(`http://localhost:3000/api/users/${id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // add token if required
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         const data = await response.json();
@@ -60,18 +60,26 @@ const UpdateUser = () => {
     setError(null);
     setSuccess(null);
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!user.firstName || !user.lastName || !user.email || !user.role) {
       setError("All fields are required.");
       setLoading(false);
       return;
     }
 
+    if (!emailRegex.test(user.email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const response = await fetch(`http://localhost:3000/api/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token if using auth
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           firstname: user.firstName,

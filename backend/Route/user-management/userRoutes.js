@@ -9,7 +9,7 @@ const {
   updateProfile,
   deleteUser,
   updateUser
-} = require('../../Controllers/user-management/userController');
+} = require('../../Controller/user-management/userController');
 
 const { protect, adminOnly } = require('../../middleware/user-management/auth');
 

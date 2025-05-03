@@ -15,7 +15,7 @@ const Login = () => {
     setError("");
   
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ const Login = () => {
       if (role === "admin") {
         navigate("/admin-dashboard");
       } else if (role === "housekeeper") {
-        navigate("/item");
+        navigate("/home");
       } else {
         setError("Unauthorized role.");
       }

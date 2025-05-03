@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs'); // Add this line at the top
-const User = require("../../Models/user-management/userModel");
+const User = require("../../Model/user-management/userModel");
 const { protect, adminOnly } = require("../../middleware/user-management/auth"); // Ensure these middleware functions are implemented
 
 const router = express.Router();

@@ -9,8 +9,8 @@ import autoTable from "jspdf-autotable";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
-  const [searchRole, setSearchRole] = useState(""); // To store the role for search filter
-  const [filteredUsers, setFilteredUsers] = useState([]); // To store filtered users for display
+  const [searchRole, setSearchRole] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -21,7 +21,7 @@ function AdminDashboard() {
           }
         });
         setUsers(response.data);
-        setFilteredUsers(response.data); // Initialize filtered users with all users
+        setFilteredUsers(response.data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -29,11 +29,9 @@ function AdminDashboard() {
     fetchUsers();
   }, []);
 
-  // Handle search by role
   const handleSearchChange = (e) => {
     const role = e.target.value;
     setSearchRole(role);
-
     const filtered = users.filter(user =>
       user.role.toLowerCase().includes(role.toLowerCase())
     );
@@ -49,7 +47,7 @@ function AdminDashboard() {
           }
         });
         setUsers(users.filter(user => user._id !== id));
-        setFilteredUsers(filteredUsers.filter(user => user._id !== id)); // Keep filtered list updated
+        setFilteredUsers(filteredUsers.filter(user => user._id !== id));
       } catch (error) {
         console.error('Error deleting user:', error);
       }
@@ -59,30 +57,28 @@ function AdminDashboard() {
   const generateReport = () => {
     const doc = new jsPDF();
     doc.text("User Report - Admin Dashboard", 14, 15);
-  
-    // Using autoTable to create a table in the PDF
+
     autoTable(doc, {
       startY: 25,
       head: [["Name", "Email", "Role"]],
-      body: filteredUsers.map((user) => [
-        `${user.firstname} ${user.lastname}`,  // Combine first and last name
-        user.email,                          // User's email
-        user.role,                           // User's role
+      body: filteredUsers.map(user => [
+        `${user.firstname} ${user.lastname}`,
+        user.email,
+        user.role,
       ]),
     });
-  
+
     doc.save("user-report.pdf");
   };
-  
 
   return (
     <div className="d-flex">
       <Sidebar />
 
-      <Container className="text-center mt-5">
-        <Row className="justify-content-center mb-4">
-          <Col md={4}>
-            <Card className="p-3 shadow-sm text-center">
+      <Container fluid className="mt-5 px-5">
+        <Row className="justify-content-center mb-5">
+          <Col md={6} lg={4}>
+            <Card className="p-4 shadow text-center">
               <Card.Body>
                 <Card.Title className="fs-5">Total Users</Card.Title>
                 <h2 className="fw-bold">{users.length}</h2>
@@ -95,18 +91,18 @@ function AdminDashboard() {
           </Col>
         </Row>
 
-        <Row className="justify-content-between mb-4">
-          <Col md={6}>
+        <Row className="justify-content-between align-items-center mb-4">
+          <Col md={8}>
             <Form.Control
               type="text"
               placeholder="Search by role"
               value={searchRole}
               onChange={handleSearchChange}
               className="mb-3"
-              style={{ backgroundColor: '#f0f8ff', borderColor: '#ddd' }} // Highlighted search box
+              style={{ backgroundColor: '#f0f8ff', borderColor: '#ddd' }}
             />
           </Col>
-          <Col md={3} className="text-end">
+          <Col md={4} className="text-md-end text-center">
             <Button
               variant="primary"
               className="fw-bold"
@@ -117,8 +113,8 @@ function AdminDashboard() {
           </Col>
         </Row>
 
-        <Table bordered hover className="shadow-sm">
-          <thead className="bg-warning">
+        <Table bordered hover responsive className="shadow-sm">
+          <thead className="bg-warning text-center">
             <tr>
               <th>First Name</th>
               <th>Last Name</th>
@@ -130,7 +126,7 @@ function AdminDashboard() {
           <tbody>
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="5">No users found</td>
+                <td colSpan="5" className="text-center">No users found</td>
               </tr>
             ) : (
               filteredUsers.map(user => (
@@ -139,7 +135,7 @@ function AdminDashboard() {
                   <td>{user.lastname}</td>
                   <td>{user.email}</td>
                   <td>{user.role}</td>
-                  <td>
+                  <td className="text-center">
                     <Link to={`/admin/update-user/${user._id}`} className="btn btn-warning btn-sm me-2">
                       Update
                     </Link>
