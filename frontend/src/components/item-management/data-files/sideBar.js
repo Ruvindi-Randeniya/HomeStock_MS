@@ -12,7 +12,7 @@ const Sidebar = () => {
 
       <nav className="flex flex-col space-y-2">
         <Link 
-          to="/" 
+          to="/home" 
           className={`py-2 px-4 rounded ${location.pathname === "/" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}
         >
           Home
