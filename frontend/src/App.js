@@ -9,7 +9,7 @@ import AddItem from './Components/item-management/pages/AddItem';
 import Home from './Components/item-management/pages/Home';
 import ItemManagement from './Components/item-management/pages/ItemManagement';
 import EditItem from './Components/item-management/pages/EditItem';
-import Categoryoverview from './Components/category-management/categoryoverview';
+import Categoryoverview from './components/category-management/categoryoverview';
 import Insertcategory from './Components/category-management/insertcategory';
 import Insertsubcategory from './Components/category-management/insertsubcategory';
 import SubCategoryOverview from './Components/category-management/subcategoryoverview';
@@ -40,3 +40,4 @@ function App() {
 }
 
 export default App;
+
