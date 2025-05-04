@@ -12,11 +12,11 @@ const CategorySchema = new mongoose.Schema({
     },
     categoryImage: {
         type: String,
-        required: true,
+        required: false,
     },
     date: {
         type: Date,
-        default: Date.now,
+        default: Date,
     }
 });
 
