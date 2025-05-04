@@ -15,6 +15,7 @@ import Insertsubcategory from './components/category-management/insertsubcategor
 import SubCategoryOverview from './components/category-management/subcategoryoverview';
 import Updatecategory from './components/category-management/updatecategory';
 import Updatesubcategory from './components/category-management/updatesubcategory';
+import HomePage from "./components/HomePage";
 import { Routes, Route } from 'react-router-dom';  // Import Routes and Route here
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
       <Route path="/subcategory-overview" element={<SubCategoryOverview />} />
       <Route path="/update-category/:id" element={<Updatecategory />} />
       <Route path="/update-subcategory/:id" element={<Updatesubcategory />} />
+      <Route path="/home-page" element={<HomePage />} />
 
     </Routes>
   );
