@@ -3,6 +3,9 @@ const router = express.Router();
 const multer = require('multer')
 const Category = require("../../model/category-management/category"); // Make sure the path is correct
 
+const Category = require("../../Model/category-management/category-model"); // Make sure the path is correct
+
+
 // Test route
 router.get("/test", (req, res) => res.send("Category routes working"));
 

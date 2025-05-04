@@ -15,7 +15,7 @@ const ItemTable = () => {
     axios
       .get("http://localhost:3000/api/items")
       .then((response) => {
-        setItems(response.data.data);
+        setItems(response.data.data || []);
       })
       .catch((error) => console.error("Error fetching items:", error));
   }, []);
@@ -27,8 +27,12 @@ const ItemTable = () => {
       .delete(`http://localhost:3000/api/items/${id}`)
       .then(() => {
         setItems((prev) => prev.filter((item) => item._id !== id));
+        alert("Item deleted successfully!");
       })
-      .catch((error) => console.error("Error deleting item:", error));
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete item.");
+      });
   };
 
   const handleSearch = (e) => {
@@ -39,8 +43,8 @@ const ItemTable = () => {
     const term = searchTerm.toLowerCase();
     return (
       item.name.toLowerCase().includes(term) ||
-      item.category.toLowerCase().includes(term) ||
-      item.subCategory.toLowerCase().includes(term)
+      (item.category?.categoryname || "").toLowerCase().includes(term) ||
+      (item.subCategory?.subCategoryName || "").toLowerCase().includes(term)
     );
   });
 
@@ -61,8 +65,8 @@ const ItemTable = () => {
         body: dataToExport.map((item) => [
           item.name,
           item.quantity,
-          item.category,
-          item.subCategory,
+          item.category?.categoryname || "N/A",
+          item.subCategory?.subCategoryName || "N/A",
           new Date(item.expireDate).toLocaleDateString(),
         ]),
       });
@@ -123,8 +127,12 @@ const ItemTable = () => {
                 >
                   <td className="p-3 border border-gray-300">{item.name}</td>
                   <td className="p-3 border border-gray-300">{item.quantity}</td>
-                  <td className="p-3 border border-gray-300">{item.category}</td>
-                  <td className="p-3 border border-gray-300">{item.subCategory}</td>
+                  <td className="p-3 border border-gray-300">
+                    {item.category?.categoryname || "N/A"}
+                  </td>
+                  <td className="p-3 border border-gray-300">
+                    {item.subCategory?.subCategoryName || "N/A"}
+                  </td>
                   <td className="p-3 border border-gray-300">
                     {new Date(item.expireDate).toLocaleDateString()}
                   </td>

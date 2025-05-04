@@ -2,7 +2,11 @@ const express = require("express")
 const router = express.Router()
 const multer = require('multer')
 const subCategory = require('../../model/category-management/subcategory-model')
+
+
+const subCategory = require("../../model/category-management/subcategory-model") // Make sure the path is correct
 const { route } = require("./category-route")
+
 
 //test
 router.get("/test", (req,res) => res.send("Sub-Category routes working"))
