@@ -1,68 +1,164 @@
-import React, { useEffect, useState } from 'react'
-import './updatecategory.css'
-import axios from 'axios'
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import './updatecategory.css';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import Sidebar from './sidebar.jsx';
+import { useParams, useNavigate } from 'react-router-dom'; // ✅ Added useNavigate
 
 const Updatecategory = () => {
- const [formData, setFormData] = useState({
-    categoryID: "",
-    categoryname: "",
-    date: "",
-    categoryImage: ""
+  const { id } = useParams();
+  const navigate = useNavigate(); // ✅ Initialize navigate
+
+  const [formData, setFormData] = useState({
+    categoryID: '',
+    categoryname: '',
+    date: '',
+    categoryImage: null,
   });
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`http://localhost:3000/api/category/${id}`)
+        .then((res) => {
+          setFormData({
+            categoryID: res.data.categoryID,
+            categoryname: res.data.categoryname,
+            date: res.data.date,
+            categoryImage: null,
+          });
+        })
+        .catch((err) => console.error("Error fetching category:", err));
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, categoryImage: e.target.files[0] });
+    setFormData((prevData) => ({
+      ...prevData,
+      categoryImage: e.target.files[0],
+    }));
   };
 
-  useEffect(() =>{
-    axios
-    .get(`http://localhost:3000/api/category/${id}`)
-    .then((res) =>{
-      setFormData({
-        categoryID: res.data.categoryID,
-        categoryname: res.data.categoryname,
-        categoryImage: res.data.categoryImage,
-        date: res.data.date
-      })
-    })
-    .catch((err) =>{
-      console.log('Error from update category')
-    })
-  },[id])
+  const validateFields = () => {
+    const errors = {};
+    if (!formData.categoryID) errors.categoryID = 'Category ID is required.';
+    if (!formData.categoryname) errors.categoryname = 'Category Name is required.';
+    if (!formData.date) errors.date = 'Date is required.';
+    if (!formData.categoryImage) errors.categoryImage = 'Category Image is required.';
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+
+    const errors = validateFields();
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      const updateData = new FormData();
+      updateData.append('categoryID', formData.categoryID);
+      updateData.append('categoryname', formData.categoryname);
+      updateData.append('date', formData.date);
+      if (formData.categoryImage instanceof File) {
+        updateData.append('categoryImage', formData.categoryImage);
+      }
+
+      try {
+        await axios.put(`http://localhost:3000/api/category/${id}`, updateData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Category updated successfully!',
+        }).then(() => {
+          navigate('/category-overview'); // ✅ Navigate after success popup
+        });
+
+        setFormData({
+          categoryID: '',
+          categoryname: '',
+          date: '',
+          categoryImage: null,
+        });
+        setIsSubmitted(false);
+        setValidationErrors({});
+      } catch (error) {
+        console.error('Error updating category:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'There was an error updating the category.',
+        });
+      }
+    }
+  };
 
   return (
-    <div>
-    <h1>UPDATE CATEGORIES</h1>
-    <div className='container'>
-      <form>
-        <label htmlFor='categoryID'> Category ID</label> 
-        <input type='text' placeholder='Enter Category ID' name='categoryID' value={formData.categoryID} onChange={handleChange} required /> <br/>
-
-        <label htmlFor='categoryName'> Category Name</label>
-        <input type='text' placeholder='Enter Category Name' name='categoryname' value={formData.categoryname} onChange={handleChange} required/><br/>
-
-        <label htmlFor='date'> Create Date</label>
-        <input type='date' name='date' value={formData.date} onChange={handleChange} required/><br/>
-
-        <label htmlFor='categoryimage'> Category Image</label>
-        <input type='file' placeholder='Select Image' name='categoryImage'onChange={handleFileChange} required/><br/>
-
-        <button type='clear'onClick={() => setFormData({ categoryID: "", categoryname: "", categoryImage: "", date: ""})} >CLEAR</button>
-        <button type='submit'>SUBMIT</button>
+    <div className="main-layout"> {/* Flex container for layout */}
+      <Sidebar /> {/* ✅ Sidebar called here */}
+    <div className="update-category-wrapper">
+      <form onSubmit={handleSubmit}>
+        <h2>Update Category</h2>
+        <div>
+          <label>Category ID</label>
+          <input
+            type="text"
+            name="categoryID"
+            value={formData.categoryID}
+            onChange={handleChange}
+            disabled
+          />
+        </div>
+        <div>
+          <label>Category Name</label>
+          <input
+            type="text"
+            name="categoryname"
+            value={formData.categoryname}
+            onChange={handleChange}
+          />
+          {validationErrors.categoryname && <p className="error">{validationErrors.categoryname}</p>}
+        </div>
+        <div>
+          <label>Date</label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+          />
+          {validationErrors.date && <p className="error">{validationErrors.date}</p>}
+        </div>
+        <div>
+          <label>Category Image</label>
+          <input
+            type="file"
+            name="categoryImage"
+            onChange={handleFileChange}
+          />
+          {validationErrors.categoryImage && <p className="error">{validationErrors.categoryImage}</p>}
+        </div>
+        <button type="submit" disabled={isSubmitted}>Update Category</button>
       </form>
     </div>
     </div>
-  )
-}
+  );
+};
 
-export default Updatecategory
+export default Updatecategory;

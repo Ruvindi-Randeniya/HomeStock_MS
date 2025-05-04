@@ -1,4 +1,4 @@
-.table-container {
+.container {
   overflow-x: auto;
 }
 
@@ -13,8 +13,8 @@
   text-align: left;
 }
 
-.table .th,
-.table .td {
+.th,
+.td {
   padding: 16px 24px;
   text-align: left;
 }
@@ -75,7 +75,7 @@
   justify-content: flex-end;
 }
 
-.pdf-btn {
+.pdf-button {
   background-color: #0a1737;
   color: white;
   padding: 12px 24px;
@@ -84,7 +84,7 @@
   cursor: pointer;
 }
 
-.pdf-btn:hover {
+.pdf-button:hover {
   background-color: #162956;
 }
 

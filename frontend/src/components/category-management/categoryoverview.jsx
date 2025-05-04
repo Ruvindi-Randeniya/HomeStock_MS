@@ -1,130 +1,148 @@
-import React, {useState,useEffect} from 'react'
-import axios from 'axios'
-import 'jspdf-autotable';
-import './categoryoverview.css'
-import { Link } from 'react-router-dom';
-const LetterHead = "../../../src/images/category-management/logo.png";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import './categoryoverview.css';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './sidebar.jsx';
+
 
 const Categoryoverview = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredCategories, setFilteredCategories] = useState([]);
-    const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
-    // Fetch categories from API
-    useEffect(() =>{
-      axios
-      .get('http://localhost:3000/api/category')
-      .then((res) => {
-        setCategories(res.data);
-        setFilteredCategories(res.data);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/category")
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error("Error fetching data:", err));
+  }, []);
+
+  const handleDelete = (id) => {
+    axios
+      .delete(`http://localhost:3000/api/category/${id}`)
+      .then(() => {
+        setCategories(categories.filter((category) => category._id !== id));
       })
-      .catch((err) => console.error("Error fetching data:",err))
-    }, [])
-  
-     //search filtering
-     useEffect(() => {
-      const filtered = categories.filter((category) =>
-        category.categoryID?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredCategories(filtered);
-    }, [searchTerm, categories]);
-    
+      .catch((err) => console.error("Error deleting category:", err));
+  };
 
-    // Handle Delete
-    const handleDelete = (id) => {
-      axios
-        .delete(`http://localhost:3000/api/category/${id}`)
-        .then(() => {
-          setCategories(categories.filter((category) => category._id !== id));
-        })
-        .catch((err) => console.error("Error deleting category:", err));
-    };
+  const filteredCategories = categories.filter((cat) =>
+    cat.categoryID.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    const generateReport = () => {
-      const doc = new jsPDF();
-      const image = new Image();
-      image.src = LetterHead;
-    
-      // Wait for the image to load
-      image.onload = () => {
-        doc.addImage(image, 'PNG', 10, 10, 190, 40); // Adjust height as needed
-        doc.setFontSize(16);
-        doc.text('Category Report', 14, 60);
-    
-        const columns = ['Category ID', 'Category Name', 'Category Image URL', 'Date'];
-        const rows = filteredCategories.map((category) => [
-          category.categoryID,
-          category.categoryName,
-          category.categoryImage,
-          category.date,
-        ]);
-    
-        doc.autoTable({
-          startY: 70,
-          head: [columns],
-          body: rows,
-        });
-    
-        doc.save('category_report.pdf');
-      };
-    
-      image.onerror = () => {
-        console.error("Failed to load the image.");
-        alert("Could not load the letterhead image. Check the path or file.");
-      };
-    };
-    
-  
+  const generateReport = () => {
+    const doc = new jsPDF();
+    doc.text("Category Overview Report", 14, 20);
+    autoTable(doc, {
+      startY: 30,
+      head: [["Category ID", "Category Name", "Create Date"]],
+      body: filteredCategories.map((cat) => [
+        cat.categoryID,
+        cat.categoryname,
+        cat.date,
+      ]),
+    });
+    doc.save("category_overview.pdf");
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/update-category/${id}`);
+  };
+
   return (
-    <div>
-        <h1 className="text">Category Overview</h1>
-        <Link to={`/insertc`}>
-        <button className='add-btn'>+ Add Category</button></Link>
-    <div className="container">
-    {/* search Input*/}
-    <input type='text' placeholder='Search by Category ID...'
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className='search-input'/>
+    <div className="main-layout"> {/* Flex container for layout */}
+    <Sidebar /> {/* ✅ Sidebar called here */}
 
-    <table className="table">
-      <thead>
-        <tr className="tr">
-          <th className="th">Category ID</th>
-          <th className="th">Category Name</th>
-          <th className="th">Create Date</th>
-          <th className="th">Category Image</th>
-          <th className="th">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-      {filteredCategories.map((category) => (
-          <tr key={category._id} className="table-row">
-            <td className="th">{category.categoryID}</td>
-            <td className="th">{category.categoryName}</td>
-            <td className="th">{category.date}</td>
-            <td className="th">
-            <div className="image-box">
-                    <img src={category.image} alt={category.name} />
-                  </div>
-            </td>
-            <td className="th">
-            <div className="action-buttons">
-            <Link to={`/updatecategory/${category._id}`}>
-            <button className='edit-btn'>Edit</button></Link>
-              <button className='delete-btn' onClick={() => handleDelete(category._id)}>Delete</button>
-              </div>
-            </td>
-          </tr>
-          ))}
-      </tbody>
-    </table>
-    <div className="pdf-button-container">
-    <button className='pdf-button' onClick={generateReport}>Generate PDF</button>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-center text-yellow-800">Category Overview</h1>
+
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => navigate("/add-category")}
+          className="bg-yellow-700 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded shadow"
+        >
+          + Add Category
+        </button>
+      </div>
+
+      <div className="bg-white shadow-lg rounded-lg p-6">
+        <input
+          type="text"
+          placeholder="Search by Category ID..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto text-sm border border-gray-300">
+            <thead className="bg-yellow-700 text-white">
+              <tr>
+                <th className="px-4 py-2 text-left">Category ID</th>
+                <th className="px-4 py-2 text-left">Category Name</th>
+                <th className="px-4 py-2 text-left">Create Date</th>
+                <th className="px-4 py-2 text-left">Image</th>
+                <th className="px-4 py-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCategories.map((category, index) => (
+                <tr
+                  key={category._id}
+                  className={`border-t ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'} hover:bg-yellow-100`}
+                >
+                  <td className="px-4 py-2">{category.categoryID}</td>
+                  <td className="px-4 py-2">{category.categoryname}</td>
+                  <td className="px-4 py-2">{category.date}</td>
+                  <td className="px-4 py-2">
+                    {category.categoryImage ? (
+                      <div className="w-16 h-16 overflow-hidden rounded border border-gray-300">
+                        <img
+                          src={`http://localhost:3000/uploads/${category.categoryImage}`}
+                          alt={category.categoryname || 'Category Image'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">No Image</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(category._id)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(category._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={generateReport}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+          >
+            Generate PDF
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-  </div>
-  )
-}
+    </div>
+  );
+};
 
-export default Categoryoverview
+export default Categoryoverview;

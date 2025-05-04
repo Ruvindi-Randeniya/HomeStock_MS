@@ -27,7 +27,7 @@ const Sidebar = () => {
         </li>
         <li className="sidebar-item">
         <NavLink
-              to="insertc"
+              to="/insert-category"
               className={({ isActive }) =>
                 isActive ? 'sidebar-link active' : 'sidebar-link'
               }
@@ -37,7 +37,7 @@ const Sidebar = () => {
         </li>
         <li className="sidebar-item">
         <NavLink
-              to="/overviewc"
+              to="/category-overview"
               className={({ isActive }) =>
                 isActive ? 'sidebar-link active' : 'sidebar-link'
               }
@@ -47,7 +47,7 @@ const Sidebar = () => {
         </li>
         <li className="sidebar-item">
         <NavLink
-              to="/inserts"
+              to="/insert-subcategory"
               className={({ isActive }) =>
                 isActive ? 'sidebar-link active' : 'sidebar-link'
               }
@@ -57,7 +57,7 @@ const Sidebar = () => {
         </li>
         <li className="sidebar-item">
         <NavLink
-              to="/overviews"
+              to="/subcategory-overview"
               className={({ isActive }) =>
                 isActive ? 'sidebar-link active' : 'sidebar-link'
               }
