@@ -8,12 +8,17 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-gray-900 text-white p-4">
       <img src={logo} alt="Logo" className="w-24 h-24 rounded-full mb-4 mx-auto" />
-      <h4 className="text-center text-xl font-bold mb-4">NESTFLOW</h4>
+      
+      <Link to="/home-page">
+        <h4 className="text-center text-xl font-bold mb-4 hover:text-yellow-500 cursor-pointer">
+          NESTFLOW
+        </h4>
+      </Link>
 
       <nav className="flex flex-col space-y-2">
         <Link 
-          to="/" 
-          className={`py-2 px-4 rounded ${location.pathname === "/" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}
+          to="/home" 
+          className={`py-2 px-4 rounded ${location.pathname === "/home" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}
         >
           Home
         </Link>
