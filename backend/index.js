@@ -4,7 +4,6 @@ const itemRoutes = require('./Route/item-management/item-route'); // Ensure corr
 const routes1 = require("./Route/category-management/category-route") // Ensure correct path
 const routes2 = require("./Route/category-management/subCategory-route")
 const cors = require('cors');
-const aiRoutes = require('./Route/item-management/aiRoute.js');
 const bodyParser = require('body-parser');
 
 
@@ -23,7 +22,7 @@ app.get('/', (req, res) => res.send('Hello World!'));
 
 // ✅ Register item routes correctly
 app.use('/api', itemRoutes);  // Fix the base path
-app.use('/ai', aiRoutes);
+
 // ✅ Register category routes correctly
 app.use("/api/category",routes1)
 app.use("/api/subcategory",routes2)

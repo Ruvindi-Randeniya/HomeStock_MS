@@ -5,11 +5,8 @@ const itemController = require('../../Controller/item-management/item-controller
 // ✅ Remove extra `/items`, already handled by `index.js`
 router.post('/items', itemController.createItem);
 router.get('/items', itemController.getItems);
-router.get('/items/expiring-soon', itemController.getExpiringItems);
-router.get('/items/expiring14', itemController.getItemsExpiringSoon);
-router.get('/items/expired', itemController.getExpiredItems);
 router.get('/items/:id', itemController.getItemById);
 router.put('/items/:id', itemController.updateItem);
 router.delete('/items/:id', itemController.deleteItem);
 
-module.exports = router; 
+module.exports = router;
