@@ -42,13 +42,13 @@ const Home = () => {
         <div className="flex items-center space-x-6">
           <div className="hidden md:flex space-x-3 font-medium text-sm md:text-base">
             <Link
-              to="/"
+              to="/home-page"
               className="px-3 py-1 rounded-md no-underline text-white hover:bg-yellow-300 hover:text-black transition"
             >
               Home
             </Link>
             <Link
-              to="/category"
+              to="/insert-category"
               className="px-3 py-1 rounded-md no-underline text-white hover:bg-yellow-300 hover:text-black transition"
             >
               Category
@@ -69,11 +69,17 @@ const Home = () => {
 
           {/* Profile Icon + Logout */}
           <div className="flex items-center space-x-4">
+          <Link
+              to="/user-profile"
+              className="px-3 py-1 rounded-md no-underline text-white hover:bg-yellow-300 hover:text-black transition"
+            >
+            
             <img
               src={profileIcon}
               alt="Profile"
               className="w-10 h-10 rounded-full object-cover"
             />
+              </Link>
             <span
               onClick={() => navigate("/")}
               className="cursor-pointer text-white font-medium text-sm"
