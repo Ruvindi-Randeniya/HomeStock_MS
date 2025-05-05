@@ -39,7 +39,7 @@ const Login = () => {
       if (role === "admin") {
         navigate("/admin-dashboard");
       } else if (role === "housekeeper") {
-        navigate("/home");
+        navigate("/home-page");
       } else {
         setError("Unauthorized role.");
       }
