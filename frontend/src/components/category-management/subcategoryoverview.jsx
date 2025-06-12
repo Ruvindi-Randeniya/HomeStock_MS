@@ -3,7 +3,8 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import autoTable from "jspdf-autotable";
 import './subcategoryoverview.css';
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import Sidebar from "./sidebar";
 
 const SubCategoryOverview = () => {
   const [subCategories, setSubCategories] = useState([]);
@@ -82,67 +83,63 @@ const SubCategoryOverview = () => {
     
     
       return (
-        <div className="p-6">
-          <h1 className="text-3xl font-bold mb-6 text-center text-purple-800">Sub-Category Overview</h1>
+        <div className="main-layout"> {/* Flex container for layout */}
+    <Sidebar /> {/* ✅ Sidebar called here */}
+
+        <div className="overview-content">
+          <h1 className="text">Sub-Category Overview</h1>
       
-          <div className="flex justify-end mb-4">
-            <Link to={`/inserts`}>
-              <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded shadow">
+          <div>
+              <button onClick={()=>Navigate("/add-subcategory")} className="add-btn">
                 + Add Sub-Category
               </button>
-            </Link>
           </div>
       
-          <div className="bg-white shadow-md rounded-lg p-6">
+          <div className="container">
             {/* 🔍 Search Input */}
             <input
               type="text"
               placeholder="Search by Sub-Category ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="search-input"
             />
       
             {/* 📊 Table */}
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto text-sm border border-gray-200">
-                <thead className="bg-purple-600 text-white">
+              <table className="table">
+                <thead className="tr">
                   <tr>
-                    <th className="px-4 py-2 text-left">Category ID</th>
-                    <th className="px-4 py-2 text-left">Sub-Category ID</th>
-                    <th className="px-4 py-2 text-left">Sub-Category Name</th>
-                    <th className="px-4 py-2 text-left">Create Date</th>
-                    <th className="px-4 py-2 text-left">Image</th>
-                    <th className="px-4 py-2 text-left">Actions</th>
+                    <th className="th">Category ID</th>
+                    <th className="th">Sub-Category ID</th>
+                    <th className="th">Sub-Category Name</th>
+                    <th className="th">Create Date</th>
+                    <th className="th">Image</th>
+                    <th className="th">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSubCategories.map((subcategory) => (
-                    <tr key={subcategory._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">{subcategory.categoryID}</td>
-                      <td className="px-4 py-2">{subcategory.subCategoryID}</td>
-                      <td className="px-4 py-2">{subcategory.subCategoryName}</td>
-                      <td className="px-4 py-2">{subcategory.date}</td>
-                      <td className="px-4 py-2">
-                        <div className="w-16 h-16 overflow-hidden rounded border border-gray-300">
-                        <img
-  src={subcategory.subCategoryImage}
-  alt="subcategory"
-  className="w-full h-full object-cover"
-/>
+                    <tr key={subcategory._id} className="table-row">
+                      <td className="th">{subcategory.categoryID}</td>
+                      <td className="th">{subcategory.subCategoryID}</td>
+                      <td className="th">{subcategory.subCategoryName}</td>
+                      <td className="th">{subcategory.date}</td>
+                      <td className="th">
+                        <div className="image-box">
+                        <img src={subcategory.subCategoryImage} alt="subcategory" className="w-full h-full object-cover"/>
 
                         </div>
                       </td>
-                      <td className="px-4 py-2">
-                        <div className="flex space-x-2">
+                      <td>
+                        <div className="action-buttons">
                           <Link to={`/updatesubcategory/${subcategory._id}`}>
-                            <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded">
+                            <button className="edit-btn">
                               Edit
                             </button>
                           </Link>
                           <button
                             onClick={() => handleDelete(subcategory._id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                            className="delete-btn"
                           >
                             Delete
                           </button>
@@ -155,16 +152,17 @@ const SubCategoryOverview = () => {
             </div>
       
             {/* 📄 PDF Button */}
-            <div className="mt-6 flex justify-end">
+            <div className="pdf-button-container">
               <button
                 onClick={generateReport}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+                className="pdf-button"
               >
                 Generate PDF
               </button>
             </div>
           </div>
-        </div>
+          </div>
+       
       );
       
 };

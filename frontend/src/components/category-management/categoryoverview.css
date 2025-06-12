@@ -1,11 +1,19 @@
 .container {
   overflow-x: auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  max-height: 600px;
 }
+
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1000px;
 }
+
+
 
 .tr {
   background-color: #e5cb85;
@@ -102,11 +110,11 @@
 }
 
 .main-layout {
-  display: flex;
-}
-
-.insert-category-content {
-  flex: 1;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
+    display: flex;
+  }
+  
+  .overview-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }

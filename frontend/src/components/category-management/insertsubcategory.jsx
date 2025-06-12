@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import './insertsubcategory.css'
 import axios from 'axios';
 import Swal from 'sweetalert2'
-
+import Sidebar from './sidebar';
 
 const Insertsubcategory = () => {
   const [subcategory, setSubCategory] = useState({
@@ -114,7 +114,9 @@ const Insertsubcategory = () => {
   }
 
   return (
-    <div>
+    <div className="main-layout"> {/* Flex container for layout */}
+    <Sidebar /> {/* ✅ Sidebar called here */}
+    <div className='insert-subCategory-content'>
     <h1>ADDING SUB CATEGORIES</h1>
     <div className='container'>
      {showPopup&&(
@@ -154,6 +156,7 @@ const Insertsubcategory = () => {
         })} >CLEAR</button>
         <button type='submit'>SUBMIT</button>
       </form>
+    </div>
     </div>
     </div>
   )
