@@ -1,199 +1,184 @@
 import React, { useState, useEffect } from 'react';
+import './updatecategory.css';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom'; // Import useNavigate and useParams
 import Swal from 'sweetalert2';
-import './updatesubcategory.css';
+import Sidebar from './sidebar.jsx';
+import { useParams, useNavigate } from 'react-router-dom'; // ✅ Added useNavigate
 
-const UpdateSubcategory = () => {
-  const navigate = useNavigate(); // Initialize navigate
-  const { id } = useParams(); // Get the ID from the URL parameter
-  const [subcategory, setSubCategory] = useState({
+const Updatesubcategory = () => {
+  const { id } = useParams();
+  const navigate = useNavigate(); // ✅ Initialize navigate
+
+  const [formData, setFormData] = useState({
     categoryID: '',
-    subCategoryID: '',
+    subCategoryID: "",
     subCategoryName: '',
     date: '',
-    subCategoryImage: '',
+    subCategoryImage: null,
   });
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showPopup, setShowPopup] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Fetch subcategory data by ID on component mount
   useEffect(() => {
-    axios
-      .get(`http://localhost:3000/api/subcategory/${id}`)
-      .then((response) => {
-        setSubCategory(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching subcategory:', error);
-        setErrorMessage('Failed to fetch subcategory data');
-        setShowPopup(true);
-      });
+    if (id) {
+      axios
+        .get(`http://localhost:3000/api/subcategory/${id}`)
+        .then((res) => {
+          setFormData({
+            categoryID: res.data.categoryID,
+            subCategoryID: res.data.subCategoryID,
+            subCategoryName: res.data.subCategoryName,
+            date: res.data.date,
+            subCategoryImage: null,
+          });
+        })
+        .catch((err) => console.error("Error fetching sub-category:", err));
+    }
   }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSubCategory((prevSubCategory) => ({
-      ...prevSubCategory,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
     }));
-
-    if (validationErrors[name]) {
-      setValidationErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: null,
-      }));
-    }
   };
 
   const handleFileChange = (e) => {
-    setSubCategory({ ...subcategory, subCategoryImage: e.target.files[0] });
+    setFormData((prevData) => ({
+      ...prevData,
+      categoryImage: e.target.files[0],
+    }));
   };
 
-  const validationFields = () => {
-    let errors = {};
-
-    for (const [key, value] of Object.entries(subcategory)) {
-      if (!value) {
-        errors[key] = 'This field is required.';
-      }
-    }
-
+  const validateFields = () => {
+    const errors = {};
+    if (!formData.categoryID) errors.categoryID = 'Category ID is required.';
+    if (!formData.subCategoryID) errors.subCategoryID = 'Sub category ID is required.';
+    if (!formData.subCategoryName) errors.subCategoryName = 'Sub Category Name is required.';
+    if (!formData.date) errors.date = 'Date is required.';
+    if (!formData.subCategoryImage) errors.subCategoryImage = 'Sub Category Image is required.';
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitted(true);
 
-    const errors = validationFields();
+    const errors = validateFields();
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      const formData = new FormData();
-      formData.append('categoryID', subcategory.categoryID);
-      formData.append('subCategoryID', subcategory.subCategoryID);
-      formData.append('subCategoryName', subcategory.subCategoryName);
-      formData.append('date', subcategory.date);
-      if (subcategory.subCategoryImage instanceof File) {
-        formData.append('subCategoryImage', subcategory.subCategoryImage);
-      } else {
-        console.error('No valid file selected for subCategoryImage');
-        return; // optionally stop the submission
+      const updateData = new FormData();
+      updateData.append('categoryID', formData.categoryID);
+      updateData.append('subCategoryID', formData.subCategoryID);
+      updateData.append('subCategoryName', formData.subCategoryName);
+      updateData.append('date', formData.date);
+      if (formData.subCategoryImage instanceof File) {
+        updateData.append('subCategoryImage', formData.subCategoryImage);
       }
 
-      axios
-        .put(`http://localhost:3000/api/subCategory/${id}`, formData, {
+      try {
+        await axios.put(`http://localhost:3000/api/subcategory/${id}`, updateData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-        })
-        .then((response) => {
-          // Success popup with updated subcategory data
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: `Sub-Category "${response.data.subCategoryName}" has been updated successfully!`,
-            confirmButtonText: 'OK',
-          });
-
-          // Redirect to the subcategory list after successful update
-          navigate('/subcategory-list');
-        })
-        .catch((error) => {
-          setErrorMessage('Failed to update Sub-Category. Please try again.');
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
         });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Sub-Category updated successfully!',
+        }).then(() => {
+          navigate('/subcategory-overview'); // ✅ Navigate after success popup
+        });
+
+        setFormData({
+          categoryID: '',
+          subCategoryID: '',
+          subCategoryName: '',
+          date: '',
+          subCategoryImage: null,
+        });
+        setIsSubmitted(false);
+        setValidationErrors({});
+      } catch (error) {
+        console.error('Error updating category:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'There was an error updating the sub-category.',
+        });
+      }
     }
   };
 
   return (
-    <div>
-      <h1>Updating Sub-Category</h1>
-      <div className="container">
-        {showPopup && (
-          <div
-            style={{
-              padding: '10px',
-              backgroundColor: errorMessage ? '#f8d7da' : '#d4edda',
-              color: errorMessage ? '#721c24' : '#155724',
-              border: `1px solid ${errorMessage ? '#f5c6cb' : '#c3e6cb'}`,
-              borderRadius: '5px',
-              marginBottom: '20px',
-            }}
-          >
-            {errorMessage}
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="categoryID">Category ID</label>
+    <div className="main-layout"> {/* Flex container for layout */}
+      <Sidebar /> {/* ✅ Sidebar called here */}
+
+      <div className="update-category-content">
+        <h1>Update Sub Category</h1>
+         <div className='container'>
+
+          <form onSubmit={handleSubmit}>
+          <div >
+          <label>Category ID</label>
           <input
             type="text"
-            placeholder="Enter Category ID"
             name="categoryID"
-            value={subcategory.categoryID}
+            value={formData.categoryID}
             onChange={handleChange}
-            required
+            disabled
           />
-          <br />
-
-          <label htmlFor="subCategoryID">Sub-Category ID</label>
+        </div>
+        <div >
+          <label>Sub Category ID</label>
           <input
             type="text"
-            placeholder="Enter Sub-Category ID"
-            name="subCategoryID"
-            value={subcategory.subCategoryID}
+            name="sub categoryID"
+            value={formData.subCategoryID}
             onChange={handleChange}
-            required
+            disabled
           />
-          <br />
-
-          <label htmlFor="subCategoryName">Sub-Category Name</label>
+        </div>
+        <div>
+          <label>Sub Category Name</label>
           <input
             type="text"
-            placeholder="Enter Sub-Category Name"
-            name="subCategoryName"
-            value={subcategory.subCategoryName}
+            name="sub categoryname"
+            value={formData.subCategoryName}
             onChange={handleChange}
-            required
           />
-          <br />
-
-          <label htmlFor="date">Create Date</label>
+          {validationErrors.subCategoryName && <p className="error">{validationErrors.subCategoryName}</p>}
+        </div>
+        <div>
+          <label>Date</label>
           <input
             type="date"
             name="date"
-            value={subcategory.date}
+            value={formData.date}
             onChange={handleChange}
-            required
           />
-
-          <label htmlFor="subCategoryImage">Sub-Category Image</label>
+          {validationErrors.date && <p className="error">{validationErrors.date}</p>}
+        </div>
+        <div>
+          <label>Sub Category Image</label>
           <input
             type="file"
-            name="subCategoryImage"
+            name="sub categoryImage"
             onChange={handleFileChange}
-            required
           />
-
-          <button type="button" onClick={() => setSubCategory({
-            categoryID: '',
-            subCategoryID: '',
-            subCategoryName: '',
-            date: '',
-            subCategoryImage: '',
-          })}>
-            CLEAR
-          </button>
-          <button type="submit">UPDATE</button>
-        </form>
-      </div>
+          {validationErrors.subCategoryImage && <p className="error">{validationErrors.subCategoryImage}</p>}
+        </div>
+        <button type="submit" disabled={isSubmitted}>Update Category</button>
+      
+      </form>
+        </div>
+    </div>
     </div>
   );
 };
 
-export default UpdateSubcategory;
+export default Updatesubcategory;

@@ -7,6 +7,7 @@ const routes2 = require("./Route/category-management/subCategory-route");
 const authRoutes = require("./Route/user-management/authRoutes");
 const userRoutes = require("./Route/user-management/userRoutes");
 const cors = require('cors');
+const path = require('path')
 const bodyParser = require('body-parser');
 
 // Load environment variables
@@ -28,6 +29,9 @@ app.get("/", (req,res) => res.send("Hello Server is Running.."));
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Root route
 app.get('/', (req, res) => res.send('Hello World!'));

@@ -3,12 +3,15 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import autoTable from "jspdf-autotable";
 import './subcategoryoverview.css';
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "./sidebar";
+import Swal from 'sweetalert2';
 
 const SubCategoryOverview = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch categories from API
   useEffect(() => {
@@ -31,15 +34,39 @@ const SubCategoryOverview = () => {
 
   // Handle Delete
   const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/subcategory/${id}`)
-      .then(() => {
-        const updated = subCategories.filter((subcategory) => subcategory._id !== id);
-        setSubCategories(updated);
-        setFilteredSubCategories(updated);
-      })
-      .catch((err) => console.error("Error Sub-deleting category:", err));
-  };
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This sub-category will be permanently deleted!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'No, cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      axios
+        .delete(`http://localhost:3000/api/subcategory/${id}`)
+        .then(() => {
+          const updated = subCategories.filter((subcategory) => subcategory._id !== id);
+          setSubCategories(updated);
+          setFilteredSubCategories(updated);
+
+          Swal.fire(
+            'Deleted!',
+            'The sub-category has been deleted.',
+            'success'
+          );
+        })
+        .catch((err) => {
+          console.error("Error deleting category:", err);
+          Swal.fire('Error', 'Something went wrong while deleting.', 'error');
+        });
+    } else {
+      Swal.fire('Cancelled', 'The sub-category is safe 😊', 'info');
+    }
+  });
+};
 
   // Generate PDF
   const generateReport = () => {
@@ -80,69 +107,80 @@ const SubCategoryOverview = () => {
         }
       };
     
+      const handleEdit = (id) => {
+    navigate(`/update-subcategory/:id`);
+  };
     
       return (
-        <div className="p-6">
-          <h1 className="text-3xl font-bold mb-6 text-center text-purple-800">Sub-Category Overview</h1>
+        <div className="main-layout"> {/* Flex container for layout */}
+    <Sidebar /> {/* ✅ Sidebar called here */}
+
+        <div className="overview-content">
+          <h1 className="text">Sub-Category Overview</h1>
       
-          <div className="flex justify-end mb-4">
-            <Link to={`/inserts`}>
-              <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded shadow">
+          <div>
+              <button onClick={()=>navigate("/update-subcategory")} className="add-btn">
                 + Add Sub-Category
               </button>
-            </Link>
           </div>
       
-          <div className="bg-white shadow-md rounded-lg p-6">
+          <div className="container">
             {/* 🔍 Search Input */}
             <input
               type="text"
               placeholder="Search by Sub-Category ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="search-input"
             />
       
             {/* 📊 Table */}
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto text-sm border border-gray-200">
-                <thead className="bg-purple-600 text-white">
+              <table className="table">
+                <thead className="tr">
                   <tr>
-                    <th className="px-4 py-2 text-left">Category ID</th>
-                    <th className="px-4 py-2 text-left">Sub-Category ID</th>
-                    <th className="px-4 py-2 text-left">Sub-Category Name</th>
-                    <th className="px-4 py-2 text-left">Create Date</th>
-                    <th className="px-4 py-2 text-left">Image</th>
-                    <th className="px-4 py-2 text-left">Actions</th>
+                    <th className="th">Category ID</th>
+                    <th className="th">Sub-Category ID</th>
+                    <th className="th">Sub-Category Name</th>
+                    <th className="th">Create Date</th>
+                    <th className="th">Image</th>
+                    <th className="th">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSubCategories.map((subcategory) => (
-                    <tr key={subcategory._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">{subcategory.categoryID}</td>
-                      <td className="px-4 py-2">{subcategory.subCategoryID}</td>
-                      <td className="px-4 py-2">{subcategory.subCategoryName}</td>
-                      <td className="px-4 py-2">{subcategory.date}</td>
-                      <td className="px-4 py-2">
-                        <div className="w-16 h-16 overflow-hidden rounded border border-gray-300">
+                    <tr key={subcategory._id} className="table-row">
+                      <td className="th">{subcategory.categoryID}</td>
+                      <td className="th">{subcategory.subCategoryID}</td>
+                      <td className="th">{subcategory.subCategoryName}</td>
+                      <td className="th">{new Date(subcategory.date).toLocaleDateString()}</td>
+                  <td className="th">
+                    <div className="image-box">
+                      {subcategory.subCategoryImage ? (
                         <img
-  src={subcategory.subCategoryImage}
-  alt="subcategory"
-  className="w-full h-full object-cover"
-/>
-
-                        </div>
-                      </td>
-                      <td className="px-4 py-2">
-                        <div className="flex space-x-2">
-                          <Link to={`/updatesubcategory/${subcategory._id}`}>
-                            <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded">
-                              Edit
-                            </button>
-                          </Link>
+                          src={`http://localhost:3000/${subcategory.subCategoryImage}`}
+                          alt={subcategory.subCategoryName}
+                          style={{ maxWidth: "100px", maxHeight: "100px" }}
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${subcategory.subCategoryImage}`);
+                            e.target.src = "https://via.placeholder.com/100?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <span>No Image</span>
+                      )}
+                    </div>
+                  </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                        onClick={() =>  handleEdit(subcategory._id)}
+                        className="edit-btn"
+                      >
+                        Edit
+                      </button>
                           <button
                             onClick={() => handleDelete(subcategory._id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                            className="delete-btn"
                           >
                             Delete
                           </button>
@@ -155,16 +193,17 @@ const SubCategoryOverview = () => {
             </div>
       
             {/* 📄 PDF Button */}
-            <div className="mt-6 flex justify-end">
+            <div className="pdf-button-container">
               <button
                 onClick={generateReport}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+                className="pdf-button"
               >
                 Generate PDF
               </button>
             </div>
           </div>
-        </div>
+          </div>
+       
       );
       
 };

@@ -5,32 +5,67 @@ import autoTable from 'jspdf-autotable';
 import './categoryoverview.css';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './sidebar.jsx';
-
+import Swal from 'sweetalert2';
 
 const Categoryoverview = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/category")
-      .then((res) => setCategories(res.data))
+      .then((res) => {
+        setCategories(res.data);
+        setFilteredCategories(res.data);
+      })
       .catch((err) => console.error("Error fetching data:", err));
   }, []);
 
-  const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/category/${id}`)
-      .then(() => {
-        setCategories(categories.filter((category) => category._id !== id));
-      })
-      .catch((err) => console.error("Error deleting category:", err));
-  };
 
-  const filteredCategories = categories.filter((cat) =>
-    cat.categoryID.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  //delete
+  const handleDelete = (id) => {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This category will be permanently deleted!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'No, cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      axios
+        .delete(`http://localhost:3000/api/category/${id}`)
+        .then(() => {
+          const updated = categories.filter((category) => category._id !== id);
+          setCategories(updated);
+          setFilteredCategories(updated);
+
+          Swal.fire(
+            'Deleted!',
+            'The category has been deleted.',
+            'success'
+          );
+        })
+        .catch((err) => {
+          console.error("Error deleting category:", err);
+          Swal.fire('Error', 'Something went wrong while deleting.', 'error');
+        });
+    } else {
+      Swal.fire('Cancelled', 'The category is safe 😊', 'info');
+    }
+  });
+};
+// Search filtering
+  useEffect(() => {
+    const filtered = categories.filter((cat) =>
+      cat.categoryID.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [searchTerm, categories]);
 
   const generateReport = () => {
     const doc = new jsPDF();
@@ -55,71 +90,75 @@ const Categoryoverview = () => {
     <div className="main-layout"> {/* Flex container for layout */}
     <Sidebar /> {/* ✅ Sidebar called here */}
 
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-center text-yellow-800">Category Overview</h1>
+    <div className='overview-content'>
+      <h1 className="text">Category Overview</h1>
 
-      <div className="flex justify-end mb-4">
+      <div>
         <button
-          onClick={() => navigate("/add-category")}
-          className="bg-yellow-700 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded shadow"
+          onClick={() => navigate("/update-category")}
+          className="add-btn"
         >
           + Add Category
         </button>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="container">
         <input
           type="text"
           placeholder="Search by Category ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          className="search-input"
         />
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto text-sm border border-gray-300">
-            <thead className="bg-yellow-700 text-white">
-              <tr>
-                <th className="px-4 py-2 text-left">Category ID</th>
-                <th className="px-4 py-2 text-left">Category Name</th>
-                <th className="px-4 py-2 text-left">Create Date</th>
-                <th className="px-4 py-2 text-left">Image</th>
-                <th className="px-4 py-2 text-left">Actions</th>
+        
+          <table className="table">
+            <thead >
+              <tr className='tr'>
+                <th className="th">Category ID</th>
+                <th className="th">Category Name</th>
+                <th className="th">Create Date</th>
+                <th className="th">Image</th>
+                <th className="th">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredCategories.map((category, index) => (
                 <tr
                   key={category._id}
-                  className={`border-t ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'} hover:bg-yellow-100`}
+                  className='table-row'
                 >
-                  <td className="px-4 py-2">{category.categoryID}</td>
-                  <td className="px-4 py-2">{category.categoryname}</td>
-                  <td className="px-4 py-2">{category.date}</td>
-                  <td className="px-4 py-2">
-                    {category.categoryImage ? (
-                      <div className="w-16 h-16 overflow-hidden rounded border border-gray-300">
+                  <td className="th">{category.categoryID}</td>
+                  <td className="th">{category.categoryname}</td>
+                  <td className="th">{new Date(category.date).toLocaleDateString()}</td>
+                  <td className="th">
+                    <div className="image-box">
+                      {category.categoryImage ? (
                         <img
-                          src={`http://localhost:3000/uploads/${category.categoryImage}`}
-                          alt={category.categoryname || 'Category Image'}
-                          className="w-full h-full object-cover"
+                          src={`http://localhost:3000/${category.categoryImage}`}
+                          alt={category.categoryName}
+                          style={{ maxWidth: "100px", maxHeight: "100px" }}
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${category.categoryImage}`);
+                            e.target.src = "https://via.placeholder.com/100?text=No+Image";
+                          }}
                         />
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">No Image</span>
-                    )}
+                      ) : (
+                        <span>No Image</span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-4 py-2">
-                    <div className="flex space-x-2">
+                  <td>
+                    <div className='action-buttons'>
                       <button
                         onClick={() => handleEdit(category._id)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        className="edit-btn"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(category._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                        className="delete-btn"
                       >
                         Delete
                       </button>
@@ -131,17 +170,17 @@ const Categoryoverview = () => {
           </table>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="pdf-button-container">
           <button
             onClick={generateReport}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+            className="pdf-button"
           >
             Generate PDF
           </button>
         </div>
       </div>
     </div>
-    </div>
+   
   );
 };
 

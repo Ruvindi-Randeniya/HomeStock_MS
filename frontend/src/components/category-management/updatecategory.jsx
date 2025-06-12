@@ -112,10 +112,13 @@ const Updatecategory = () => {
   return (
     <div className="main-layout"> {/* Flex container for layout */}
       <Sidebar /> {/* ✅ Sidebar called here */}
-    <div className="update-category-wrapper">
-      <form onSubmit={handleSubmit}>
-        <h2>Update Category</h2>
-        <div>
+
+      <div className="update-category-content">
+        <h1>Update Category</h1>
+         <div className='container'>
+
+          <form onSubmit={handleSubmit}>
+          <div >
           <label>Category ID</label>
           <input
             type="text"
@@ -155,7 +158,9 @@ const Updatecategory = () => {
           {validationErrors.categoryImage && <p className="error">{validationErrors.categoryImage}</p>}
         </div>
         <button type="submit" disabled={isSubmitted}>Update Category</button>
+      
       </form>
+        </div>
     </div>
     </div>
   );
