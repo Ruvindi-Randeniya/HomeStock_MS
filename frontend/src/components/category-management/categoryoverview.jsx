@@ -5,32 +5,67 @@ import autoTable from 'jspdf-autotable';
 import './categoryoverview.css';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './sidebar.jsx';
-
+import Swal from 'sweetalert2';
 
 const Categoryoverview = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/category")
-      .then((res) => setCategories(res.data))
+      .then((res) => {
+        setCategories(res.data);
+        setFilteredCategories(res.data);
+      })
       .catch((err) => console.error("Error fetching data:", err));
   }, []);
 
-  const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/category/${id}`)
-      .then(() => {
-        setCategories(categories.filter((category) => category._id !== id));
-      })
-      .catch((err) => console.error("Error deleting category:", err));
-  };
 
-  const filteredCategories = categories.filter((cat) =>
-    cat.categoryID.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  //delete
+  const handleDelete = (id) => {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This category will be permanently deleted!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'No, cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      axios
+        .delete(`http://localhost:3000/api/category/${id}`)
+        .then(() => {
+          const updated = categories.filter((category) => category._id !== id);
+          setCategories(updated);
+          setFilteredCategories(updated);
+
+          Swal.fire(
+            'Deleted!',
+            'The category has been deleted.',
+            'success'
+          );
+        })
+        .catch((err) => {
+          console.error("Error deleting category:", err);
+          Swal.fire('Error', 'Something went wrong while deleting.', 'error');
+        });
+    } else {
+      Swal.fire('Cancelled', 'The category is safe 😊', 'info');
+    }
+  });
+};
+// Search filtering
+  useEffect(() => {
+    const filtered = categories.filter((cat) =>
+      cat.categoryID.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [searchTerm, categories]);
 
   const generateReport = () => {
     const doc = new jsPDF();
@@ -60,7 +95,7 @@ const Categoryoverview = () => {
 
       <div>
         <button
-          onClick={() => navigate("/add-category")}
+          onClick={() => navigate("/insert-category")}
           className="add-btn"
         >
           + Add Category
@@ -95,18 +130,23 @@ const Categoryoverview = () => {
                 >
                   <td className="th">{category.categoryID}</td>
                   <td className="th">{category.categoryname}</td>
-                  <td className="th">{category.date}</td>
+                  <td className="th">{new Date(category.date).toLocaleDateString()}</td>
                   <td className="th">
-                    {category.categoryImage ? (
-                      <div className="image-box">
+                    <div className="image-box">
+                      {category.categoryImage ? (
                         <img
-                          src={`http://localhost:3000/uploads/${category.categoryImage}`}
-                          alt={category.categoryname || 'Category Image'}
+                          src={`http://localhost:3000/${category.categoryImage}`}
+                          alt={category.categoryName}
+                          style={{ maxWidth: "100px", maxHeight: "100px" }}
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${category.categoryImage}`);
+                            e.target.src = "https://via.placeholder.com/100?text=No+Image";
+                          }}
                         />
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">No Image</span>
-                    )}
+                      ) : (
+                        <span>No Image</span>
+                      )}
+                    </div>
                   </td>
                   <td>
                     <div className='action-buttons'>

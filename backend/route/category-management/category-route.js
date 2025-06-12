@@ -4,11 +4,9 @@ const multer = require('multer')
 const Category = require("../../Model/category-management/category-model");
 const path = require("path")
 const fs = require("fs");
-const app = express();
+
 // Test route
 router.get("/test", (req, res) => res.send("Category routes working"));
-
-app.use('/uploads', express.static('uploads'));
 
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
@@ -39,38 +37,41 @@ const upload = multer({
 
 router.post("/", (req, res) => {
     upload(req, res, async (err) => {
-        if (err) {
-            return res.status(400).json({ msg: "File upload failed", error: err.message });
-        }
-        try {
-            const { categoryID, categoryname, date } = req.body;
-            const categoryImage = req.file ? req.file.path.replace(/\\/g, "/") : null;
-
-            // Check for duplicate CategoryID
-            const existingCategory = await Category.findOne({categoryID})
-            if (existingCategory) {
-                return res.status(400).json({ msg: "Category ID already exists" });
-            }
-
-            // Parse date
-            const parsedDate = new Date(date);
-            if (isNaN(parsedDate)) {
-                return res.status(400).json({ msg: "Invalid date format" });
-            }
-
-            const newCategory = new Category({
-                categoryID,
-                categoryname,
-                categoryImage,
-                date: parsedDate,
-            })
-
-            await newCategory.save();
-            res.status(201).json({ msg: "Category added successfully" });
-        } catch (error) {
-            console.error("Error while adding category:", error);
-            res.status(500).json({ msg: "Category adding failed", error: error.message, stack: error.stack });
-        }
+       if (err) {
+                   console.error("Multer error:", err.message);
+                   return res.status(400).json({ msg: "File upload failed", error: err.message });
+               }
+               try {
+                   const { categoryID, categoryname, date } = req.body;
+                   if (!req.file) {
+                       return res.status(400).json({ msg: "No image file uploaded" });
+                   }
+                   const categoryImage = req.file.path.replace(/\\/g, "/");
+                   console.log("Saved image path:", categoryImage);
+       
+                   const existingCategory = await Category.findOne({categoryID});
+                   if(existingCategory){
+                    return res.status(400).json({msg: "Category ID already exists"});
+                   }
+       
+                   const parsedDate = new Date(date);
+                   if (isNaN(parsedDate)) {
+                       return res.status(400).json({ msg: "Invalid date format" });
+                   }
+       
+                   const newCategory = new subCategory({
+                       categoryID,
+                       categoryname,
+                       categoryImage,
+                       date: parsedDate,
+                   });
+       
+                   await newCategory.save();
+                   res.status(201).json({ msg: "Category added successfully", path: categoryImage });
+               } catch (error) {
+                   console.error("Error while adding Category:", error.message);
+                   res.status(500).json({ msg: "Category adding failed", error: error.message });
+               }
     });
 });
 

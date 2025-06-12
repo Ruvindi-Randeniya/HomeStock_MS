@@ -3,13 +3,15 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import autoTable from "jspdf-autotable";
 import './subcategoryoverview.css';
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import Sidebar from "./sidebar";
+import Swal from 'sweetalert2';
 
 const SubCategoryOverview = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch categories from API
   useEffect(() => {
@@ -32,15 +34,39 @@ const SubCategoryOverview = () => {
 
   // Handle Delete
   const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/subcategory/${id}`)
-      .then(() => {
-        const updated = subCategories.filter((subcategory) => subcategory._id !== id);
-        setSubCategories(updated);
-        setFilteredSubCategories(updated);
-      })
-      .catch((err) => console.error("Error Sub-deleting category:", err));
-  };
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This sub-category will be permanently deleted!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'No, cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      axios
+        .delete(`http://localhost:3000/api/subcategory/${id}`)
+        .then(() => {
+          const updated = subCategories.filter((subcategory) => subcategory._id !== id);
+          setSubCategories(updated);
+          setFilteredSubCategories(updated);
+
+          Swal.fire(
+            'Deleted!',
+            'The sub-category has been deleted.',
+            'success'
+          );
+        })
+        .catch((err) => {
+          console.error("Error deleting category:", err);
+          Swal.fire('Error', 'Something went wrong while deleting.', 'error');
+        });
+    } else {
+      Swal.fire('Cancelled', 'The sub-category is safe 😊', 'info');
+    }
+  });
+};
 
   // Generate PDF
   const generateReport = () => {
@@ -90,7 +116,7 @@ const SubCategoryOverview = () => {
           <h1 className="text">Sub-Category Overview</h1>
       
           <div>
-              <button onClick={()=>Navigate("/add-subcategory")} className="add-btn">
+              <button onClick={()=>navigate("/insert-subcategory")} className="add-btn">
                 + Add Sub-Category
               </button>
           </div>
@@ -123,13 +149,24 @@ const SubCategoryOverview = () => {
                       <td className="th">{subcategory.categoryID}</td>
                       <td className="th">{subcategory.subCategoryID}</td>
                       <td className="th">{subcategory.subCategoryName}</td>
-                      <td className="th">{subcategory.date}</td>
-                      <td className="th">
-                        <div className="image-box">
-                        <img src={subcategory.subCategoryImage} alt="subcategory" className="w-full h-full object-cover"/>
-
-                        </div>
-                      </td>
+                      <td className="th">{new Date(subcategory.date).toLocaleDateString()}</td>
+                  <td className="th">
+                    <div className="image-box">
+                      {subcategory.subCategoryImage ? (
+                        <img
+                          src={`http://localhost:3000/${subcategory.subCategoryImage}`}
+                          alt={subcategory.subCategoryName}
+                          style={{ maxWidth: "100px", maxHeight: "100px" }}
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${subcategory.subCategoryImage}`);
+                            e.target.src = "https://via.placeholder.com/100?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <span>No Image</span>
+                      )}
+                    </div>
+                  </td>
                       <td>
                         <div className="action-buttons">
                           <Link to={`/updatesubcategory/${subcategory._id}`}>

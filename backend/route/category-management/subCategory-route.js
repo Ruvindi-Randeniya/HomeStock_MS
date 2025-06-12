@@ -38,19 +38,22 @@ router.get("/test", (req, res) => res.send("Sub-Category routes working"));
 router.post("/", (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
+            console.error("Multer error:", err.message);
             return res.status(400).json({ msg: "File upload failed", error: err.message });
         }
         try {
             const { categoryID, subCategoryID, subCategoryName, date } = req.body;
-            const subCategoryImage = req.file ? req.file.path.replace(/\\/g, "/") : null;
+            if (!req.file) {
+                return res.status(400).json({ msg: "No image file uploaded" });
+            }
+            const subCategoryImage = req.file.path.replace(/\\/g, "/");
+            console.log("Saved image path:", subCategoryImage);
 
-            // Check for duplicate subCategoryID
             const existingSubCategory = await subCategory.findOne({ subCategoryID });
             if (existingSubCategory) {
                 return res.status(400).json({ msg: "Subcategory ID already exists" });
             }
 
-            // Parse date
             const parsedDate = new Date(date);
             if (isNaN(parsedDate)) {
                 return res.status(400).json({ msg: "Invalid date format" });
@@ -65,10 +68,10 @@ router.post("/", (req, res) => {
             });
 
             await newSubCategory.save();
-            res.status(201).json({ msg: "Subcategory added successfully" });
+            res.status(201).json({ msg: "Subcategory added successfully", path: subCategoryImage });
         } catch (error) {
-            console.error("Error while adding subcategory:", error);
-            res.status(500).json({ msg: "Subcategory adding failed", error: error.message, stack: error.stack });
+            console.error("Error while adding subcategory:", error.message);
+            res.status(500).json({ msg: "Subcategory adding failed", error: error.message });
         }
     });
 });

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom'; // Import useNavigate and useParams
 import Swal from 'sweetalert2';
 import './updatesubcategory.css';
+import Sidebar from './sidebar';
 
 const UpdateSubcategory = () => {
   const navigate = useNavigate(); // Initialize navigate
@@ -112,7 +113,9 @@ const UpdateSubcategory = () => {
   };
 
   return (
-    <div>
+    <div className="main-layout"> {/* Flex container for layout */}
+    <Sidebar /> {/* ✅ Sidebar called here */}
+    <div className='update-content'>
       <h1>Updating Sub-Category</h1>
       <div className="container">
         {showPopup && (
@@ -192,6 +195,7 @@ const UpdateSubcategory = () => {
           <button type="submit">UPDATE</button>
         </form>
       </div>
+    </div>
     </div>
   );
 };
