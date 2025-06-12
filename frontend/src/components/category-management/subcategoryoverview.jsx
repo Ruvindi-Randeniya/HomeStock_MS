@@ -3,7 +3,7 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import autoTable from "jspdf-autotable";
 import './subcategoryoverview.css';
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Swal from 'sweetalert2';
 
@@ -107,6 +107,9 @@ const SubCategoryOverview = () => {
         }
       };
     
+      const handleEdit = (id) => {
+    navigate(`/update-subcategory/:id`);
+  };
     
       return (
         <div className="main-layout"> {/* Flex container for layout */}
@@ -116,7 +119,7 @@ const SubCategoryOverview = () => {
           <h1 className="text">Sub-Category Overview</h1>
       
           <div>
-              <button onClick={()=>navigate("/insert-subcategory")} className="add-btn">
+              <button onClick={()=>navigate("/update-subcategory")} className="add-btn">
                 + Add Sub-Category
               </button>
           </div>
@@ -169,11 +172,12 @@ const SubCategoryOverview = () => {
                   </td>
                       <td>
                         <div className="action-buttons">
-                          <Link to={`/updatesubcategory/${subcategory._id}`}>
-                            <button className="edit-btn">
-                              Edit
-                            </button>
-                          </Link>
+                          <button
+                        onClick={() =>  handleEdit(subcategory._id)}
+                        className="edit-btn"
+                      >
+                        Edit
+                      </button>
                           <button
                             onClick={() => handleDelete(subcategory._id)}
                             className="delete-btn"

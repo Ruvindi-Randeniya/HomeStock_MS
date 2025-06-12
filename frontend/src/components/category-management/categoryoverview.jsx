@@ -95,7 +95,7 @@ const Categoryoverview = () => {
 
       <div>
         <button
-          onClick={() => navigate("/insert-category")}
+          onClick={() => navigate("/update-category")}
           className="add-btn"
         >
           + Add Category

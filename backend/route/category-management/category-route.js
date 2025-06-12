@@ -59,7 +59,7 @@ router.post("/", (req, res) => {
                        return res.status(400).json({ msg: "Invalid date format" });
                    }
        
-                   const newCategory = new subCategory({
+                   const newCategory = new Category({
                        categoryID,
                        categoryname,
                        categoryImage,
